@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Media;
 using System.Numerics;
+using System.Diagnostics;
 
 namespace PomodoroApp
 {
@@ -19,10 +20,11 @@ namespace PomodoroApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private  DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer timer = new();
         private int time = 0;
         private bool isWorkCycle = true;
-        private readonly MediaPlayer player = new MediaPlayer();
+        private readonly MediaPlayer player = new();
+        private int numberOfPomodoro = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -34,9 +36,7 @@ namespace PomodoroApp
         }
         private void StartClick(object sender, RoutedEventArgs e)
         {
-            Button? btn = sender as Button;
-
-            if(!timer.IsEnabled)
+            if (!timer.IsEnabled)
             {
                 timer.Start();
             }
@@ -46,11 +46,16 @@ namespace PomodoroApp
             }
             ChangeTextButton();
         }
-        public void timer_Tick(object sender, EventArgs e)
+
+        private void timer_Tick(object sender, EventArgs e)
         {
             time++;
             frontTimer.Content = formatTime(time);
 
+            double angle = (time % 60) * (360 / 60);
+            HandRotation.Angle = angle;
+
+            //2500
             if (isWorkCycle && time == 3)
             {
                 timer.Stop();
@@ -58,22 +63,43 @@ namespace PomodoroApp
                 new AutoCloseMessage("Temps de Repos Unlock", 3).Show();
                 SwitchCycle();
             }
-
-            if (!isWorkCycle && time == 300)
+            if (numberOfPomodoro != 4)
             {
-                timer.Stop();
-                PlayNotificationSound();
-                new AutoCloseMessage("Au travail", 3).Show();
-                SwitchCycle();
+                //300
+                if (!isWorkCycle && time == 3)
+                {
+                    timer.Stop();
+                    PlayNotificationSound();
+                    new AutoCloseMessage("Au travail", 3).Show();
+                    SwitchCycle();
+                }
+                else
+                {
+                    if (!isWorkCycle && time == 2500)
+                    {
+                        timer.Stop();
+                        numberOfPomodoro = 0;
+                        PlayNotificationSound();
+                        new AutoCloseMessage("Temps de Repos Unlock", 3).Show();
+                        SwitchCycle();
+                    }
+                }
             }
+
         }
 
         private void SwitchCycle()
         {
+            if (isWorkCycle)
+            {
+                numberOfPomodoro++;
+                Debug.WriteLine($"Nombre de Pomodoro : {numberOfPomodoro}");
+            }
             isWorkCycle = !isWorkCycle;
             time = 0;
             frontTimer.Content = formatTime(time);
             ChangeTextButton();
+            timer.Start();
         }
 
         private string formatTime(int global)
