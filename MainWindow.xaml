@@ -1,9 +1,9 @@
 ﻿<Window x:Class="PomodoroApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		ShowInTaskbar="False"
         Title="Pomodoro" Height="350" Width="350"
-        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
-        Background="White">
+        ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
 
 	<Grid>
 		<!-- Cadran circulaire -->
@@ -22,10 +22,11 @@
 			</Line.RenderTransform>
 		</Line>
 
-		<!-- Timer texte (facultatif selon besoin) -->
+		<!-- Timer texte -->
 		<Label x:Name="frontTimer"
                Content=""
                FontSize="24"
+		       HorizontalAlignment="Center"
                VerticalAlignment="Bottom"
                Margin="0,0,0,40"/>
 
