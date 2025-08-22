@@ -21,8 +21,9 @@ namespace PomodoroApp
         public int timeOfWork = 10;
         public int timeOfRest = 10;
         private Forms.NotifyIcon nIcon = new();
-        private ContextMenuStrip? contextMenu;
+        private ContextMenuStrip contextMenu;
         private MiniTimer miniTimer;
+        private Options optionsWindow;
 
         //Hotkey
         private const int HOTKEY_ID = 1;
@@ -58,31 +59,14 @@ namespace PomodoroApp
             ouvrirItem.Click += (s, e) => Restaure();
             contextMenu.Items.Add(ouvrirItem);
 
+            ToolStripMenuItem options = new ToolStripMenuItem("Options");
+            options.Click += (s, e) => OpenOptions();
+
             //Close the context menu
             ToolStripMenuItem quit = new ToolStripMenuItem("Quitter");
-            quit.Click += (s, e) => Close();
+            quit.Click += (s, e) => CloseAllWindows();
             contextMenu.Items.Add(quit);
 
-            ToolStripMenuItem options = new ToolStripMenuItem("Options");
-            options.Click += (s, e) =>
-            {
-                Options optionsWindow = new Options(timeOfWork, timeOfRest);
-                bool? result = optionsWindow.ShowDialog();
-                if (result == true)
-                {
-                    timeOfWork = optionsWindow.WorkTime;
-                    timeOfRest = optionsWindow.RestTime;
-
-                    time = 0; // Reset the timer
-                    frontTimer.Content = FormatTime(time);
-                    if (timer.IsEnabled)
-                    {
-                        timer.Stop(); // Stop the timer if it's running
-                        ChangeTextButton(); // Update the button text
-                    }
-                    numberOfPomodoro = 0; // Reset the number of Pomodoros
-                }
-            };
 
             contextMenu.Items.Add(options);
 
@@ -247,6 +231,9 @@ namespace PomodoroApp
             UnregisterHotKey(handle, HOTKEY_ID);
             UnregisterHotKey(handle, HOTKEY_ID_MINITIMER);
             _source.RemoveHook(HwndHook);
+
+            // Ferme toutes les fenêtres ouvertes
+            CloseAllWindows();
             base.OnClosed(e);
         }
 
@@ -271,21 +258,20 @@ namespace PomodoroApp
 
         private void OpenOptions()
         {
-            Options optionsWindow = new Options(timeOfWork, timeOfRest);
-            bool? result = optionsWindow.ShowDialog();
-            if (result == true)
+            if (optionsWindow == null)
             {
-                timeOfWork = optionsWindow.WorkTime;
-                timeOfRest = optionsWindow.RestTime;
-
-                time = 0;
-                frontTimer.Content = FormatTime(time);
-                if (timer.IsEnabled)
+                optionsWindow = new Options(timeOfWork, timeOfRest);
+                optionsWindow.Closed += (sender, args) =>
                 {
-                    timer.Stop();
-                    ChangeTextButton();
-                }
-                numberOfPomodoro = 0;
+                    timeOfWork = optionsWindow.WorkTime;
+                    timeOfRest = optionsWindow.RestTime;
+                    optionsWindow = null;
+                };
+                optionsWindow.Show();
+            }
+            else
+            {
+                optionsWindow.Activate();
             }
         }
 
@@ -303,6 +289,32 @@ namespace PomodoroApp
             else
             {
                 miniTimer.Show();
+            }
+        }
+
+        private void CloseAllWindows()
+        {
+            try
+            {
+                // Ferme le MiniTimer s'il existe
+                if (miniTimer != null)
+                {
+                    miniTimer.Close();
+                    miniTimer = null;
+                }
+
+                // Ferme Options si ouverte
+                if (optionsWindow != null)
+                {
+                    optionsWindow.Close();
+                    optionsWindow = null;
+                }
+
+                this.Close(); // Ferme la fenêtre principale
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Erreur lors de la fermeture : {ex.Message}");
             }
         }
 

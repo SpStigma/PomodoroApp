@@ -48,5 +48,10 @@ namespace PomodoroApp
 
             Close();
         }
+
+        public void ForceClose()
+        {
+            this.Close();
+        }
     }
 }
