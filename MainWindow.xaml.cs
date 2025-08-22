@@ -24,6 +24,7 @@ namespace PomodoroApp
         private ContextMenuStrip contextMenu;
         private MiniTimer miniTimer;
         private Options optionsWindow;
+        private string currentNotificationSound = "Sounds/notif.mp3";
 
         //Hotkey
         private const int HOTKEY_ID = 1;
@@ -202,7 +203,7 @@ namespace PomodoroApp
         {
             try
             {
-                player.Open(new Uri("Sounds/notif.mp3", UriKind.Relative));
+                player.Open(new Uri(currentNotificationSound, UriKind.RelativeOrAbsolute));
                 player.Play();
             }
             catch (Exception ex)
@@ -260,17 +261,34 @@ namespace PomodoroApp
         {
             if (optionsWindow == null)
             {
+                // On crée la fenêtre Options en lui passant les valeurs actuelles
                 optionsWindow = new Options(timeOfWork, timeOfRest);
+
+                // On définit le chemin actuel du son dans la fenêtre Options
+                optionsWindow.NotificationSound = currentNotificationSound;
+                optionsWindow.AudioPathTextBox.Text = currentNotificationSound;
+
+                // Gestion de la fermeture de la fenêtre Options
                 optionsWindow.Closed += (sender, args) =>
                 {
+                    // On récupère les valeurs modifiées
                     timeOfWork = optionsWindow.WorkTime;
                     timeOfRest = optionsWindow.RestTime;
+                    currentNotificationSound = optionsWindow.NotificationSound;
+
+                    // On applique directement le son choisi au MediaPlayer
+                    player.Open(new Uri(currentNotificationSound, UriKind.RelativeOrAbsolute));
+
+                    // On libère la référence
                     optionsWindow = null;
                 };
+
+                // Affichage non modal
                 optionsWindow.Show();
             }
             else
             {
+                // Si la fenêtre existe déjà, on la ramène au premier plan
                 optionsWindow.Activate();
             }
         }

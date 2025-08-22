@@ -1,13 +1,8 @@
 ﻿<Window x:Class="PomodoroApp.Options"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PomodoroApp"
-        mc:Ignorable="d"
-        Title="Options" Height="200" Width="200">
+        Title="Options" Height="250" Width="250">
     <Grid>
-        <!-- Stack panele pour centré et metre les text dedans -->
         <StackPanel Margin="10" VerticalAlignment="Center" HorizontalAlignment="Center" >
             <TextBlock Text="Temps de travail (secondes) :" Margin="0,0,0,5"/>
             <TextBox Name="WorkTimeTextBox" Width="178" Margin="0,0,0,10"/>
@@ -15,7 +10,13 @@
             <TextBlock Text="Temps de repos (secondes) :" Margin="0,0,0,5"/>
             <TextBox Name="RestTimeTextBox" Width="176" Margin="0,0,0,10"/>
 
-            <Button Content="Valider" Width="100" HorizontalAlignment="Center" Click="Valider_Click"/>
+            <TextBlock Text="Notification audio :" Margin="0,0,0,5"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Name="AudioPathTextBox" Width="140" IsReadOnly="True"/>
+                <Button Content="..." Width="60" Margin="5,0,0,0" Click="ChoisirAudio_Click"/>
+            </StackPanel>
+
+            <Button Content="Valider" Width="100" HorizontalAlignment="Center" Margin="0,10,0,0" Click="Valider_Click"/>
         </StackPanel>
     </Grid>
 </Window>
