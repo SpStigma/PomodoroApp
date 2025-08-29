@@ -29,9 +29,11 @@ namespace PomodoroApp
         //Hotkey
         private const int HOTKEY_ID = 1;
         private const int HOTKEY_ID_MINITIMER = 2;
+        private const int HOTKEY_ID_RESTORE = 3;
         private const uint MOD_CONTROL = 0x0002; // Control key
         private const uint VK_I = 0x49; // 'I' key
         private const uint VK_H = 0x48; // 'H' key
+        private const uint VK_R = 0x52; // 'R' key
         private const int WM_HOTKEY = 0x0312;
         private HwndSource _source;
 
@@ -106,6 +108,18 @@ namespace PomodoroApp
             this.WindowState = WindowState.Normal;
             this.Activate();
 
+        }
+
+        private void ToggleMainWindow()
+        {
+            if (this.IsVisible && this.WindowState != WindowState.Minimized)
+            {
+                this.Hide();
+            }
+            else
+            {
+                Restaure();
+            }
         }
 
         private void StartClick(object sender, RoutedEventArgs e)
@@ -224,6 +238,8 @@ namespace PomodoroApp
             RegisterHotKey(handle, HOTKEY_ID, MOD_CONTROL, VK_I);
             // Enregistre Ctrl+H pour le mini-timer
             RegisterHotKey(handle, HOTKEY_ID_MINITIMER, MOD_CONTROL, VK_H);
+            // Enregistre Ctrl+R pour restaurer la fenêtre principale
+            RegisterHotKey(handle, HOTKEY_ID_RESTORE, MOD_CONTROL, VK_R);
         }
 
         protected override void OnClosed(EventArgs e)
@@ -231,6 +247,7 @@ namespace PomodoroApp
             var handle = new WindowInteropHelper(this).Handle;
             UnregisterHotKey(handle, HOTKEY_ID);
             UnregisterHotKey(handle, HOTKEY_ID_MINITIMER);
+            UnregisterHotKey(handle, HOTKEY_ID_RESTORE);
             _source.RemoveHook(HwndHook);
 
             // Ferme toutes les fenêtres ouvertes
@@ -245,12 +262,17 @@ namespace PomodoroApp
                 int id = wParam.ToInt32();
                 if (id == HOTKEY_ID)
                 {
-                    OpenOptions();
+                    ToggleOptions();
                     handled = true;
                 }
                 else if (id == HOTKEY_ID_MINITIMER)
                 {
                     ToggleMiniTimer();
+                    handled = true;
+                }
+                else if (id == HOTKEY_ID_RESTORE)
+                {
+                    ToggleMainWindow();
                     handled = true;
                 }
             }
@@ -307,6 +329,19 @@ namespace PomodoroApp
             else
             {
                 miniTimer.Show();
+            }
+        }
+
+        private void ToggleOptions()
+        {
+            if (optionsWindow == null)
+            {
+                OpenOptions();
+            }
+            else
+            {
+                optionsWindow.Close();
+                optionsWindow = null;
             }
         }
 
