@@ -13,8 +13,10 @@ namespace PomodoroApp
         {
             InitializeComponent();
 
-            WorkTimeTextBox.Text = currentWorkTime.ToString();
-            RestTimeTextBox.Text = currentRestTime.ToString();
+            WorkMinutesTextBox.Text = (currentWorkTime / 60).ToString();
+            WorkSecondsTextBox.Text = (currentWorkTime % 60).ToString();
+            RestMinutesTextBox.Text = (currentRestTime / 60).ToString();
+            RestSecondsTextBox.Text = (currentRestTime % 60).ToString();
             AudioPathTextBox.Text = NotificationSound;
         }
 
@@ -31,15 +33,28 @@ namespace PomodoroApp
 
         private void Valider_Click(object sender, RoutedEventArgs e)
         {
-            int work, rest;
+            int wMin, wSec, rMin, rSec;
 
-            if (!int.TryParse(WorkTimeTextBox.Text, out work) || !int.TryParse(RestTimeTextBox.Text, out rest) || work <= 0 || rest <= 0)
+            //Check l'input de l'uilisateur pour voir si c'est un nombre
+            if (!int.TryParse(WorkMinutesTextBox.Text, out wMin))
                 return;
 
-            WorkTime = work;
-            RestTime = rest;
+            if (!int.TryParse(WorkSecondsTextBox.Text, out wSec))
+                return;
 
-            OptionsSaved?.Invoke(); // notifie MainWindow
+            if (!int.TryParse(RestMinutesTextBox.Text, out rMin))
+                return;
+
+            if (!int.TryParse(RestSecondsTextBox.Text, out rSec))
+                return;
+
+            if (wMin < 0 || wSec < 0 || rMin < 0 || rSec < 0)
+                return;
+
+            WorkTime = wMin * 60 + wSec;
+            RestTime = rMin * 60 + rSec;
+
+            OptionsSaved?.Invoke();
             Close();
         }
     }

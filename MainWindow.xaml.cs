@@ -1,10 +1,11 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.Diagnostics;
 using Forms = System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.Windows.Interop;
 
 namespace PomodoroApp
 {
@@ -18,13 +19,14 @@ namespace PomodoroApp
         private bool isWorkCycle = true;
         private readonly MediaPlayer player = new();
         private int numberOfPomodoro = 0;
-        public int timeOfWork = 10;
-        public int timeOfRest = 10;
+        public int timeOfWork = 2500;
+        public int timeOfRest = 900;
         private Forms.NotifyIcon nIcon = new();
         private ContextMenuStrip contextMenu;
         private MiniTimer miniTimer;
         private Options optionsWindow;
         private string currentNotificationSound = "Sounds/notif.mp3";
+        private DispatcherTimer stopSoundTimer;
 
         //Hotkey
         private const int HOTKEY_ID = 1;
@@ -37,6 +39,7 @@ namespace PomodoroApp
         private const int WM_HOTKEY = 0x0312;
         private HwndSource _source;
 
+
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
         [DllImport("user32.dll")]
@@ -44,6 +47,8 @@ namespace PomodoroApp
         public MainWindow()
         {
             InitializeComponent();
+            DrawClockFace();
+            LoadSoundCloudMusic();
             timer.Interval = TimeSpan.FromSeconds(1);
             //Call the methode
             timer.Tick += Timer_Tick;
@@ -76,6 +81,103 @@ namespace PomodoroApp
             nIcon.ContextMenuStrip = contextMenu;
             Debug.WriteLine($"{timeOfRest} et {timeOfWork}");
 
+        }
+
+        private void DrawClockFace()
+        {
+            // Centre et Rayon du cadran (basé sur la taille 200x200 définie dans le XAML)
+            double centerX = 100;
+            double centerY = 100;
+            double radius = 100;
+
+            // On boucle de 0 à 59 (les 60 secondes)
+            for (int i = 0; i < 60; i++)
+            {
+                // Calcul de l'angle (6 degrés par seconde)
+                // On retire 90 degrés pour commencer à midi (en haut) au lieu de 3h (à droite)
+                double angleDegree = i * 6;
+                double angleRad = (angleDegree - 90) * (Math.PI / 180);
+
+                // Déterminer si c'est un "Gros trait" (toutes les 5 secondes) ou un petit
+                bool isMajor = (i % 5 == 0);
+
+                // Configuration du trait
+                double lineLength = isMajor ? 15 : 8; // Longueur du trait
+                double thickness = isMajor ? 3 : 1;   // Épaisseur
+                System.Windows.Media.Brush color = System.Windows.Media.Brushes.Black;
+
+                // Calcul des coordonnées du trait
+                // Point extérieur (sur le bord du cercle)
+                double xOuter = centerX + radius * Math.Cos(angleRad);
+                double yOuter = centerY + radius * Math.Sin(angleRad);
+
+                // Point intérieur
+                double xInner = centerX + (radius - lineLength) * Math.Cos(angleRad);
+                double yInner = centerY + (radius - lineLength) * Math.Sin(angleRad);
+
+                // Création de la ligne
+                System.Windows.Shapes.Line line = new System.Windows.Shapes.Line()
+                {
+                    X1 = xOuter,
+                    Y1 = yOuter,
+                    X2 = xInner,
+                    Y2 = yInner,
+                    Stroke = color,
+                    StrokeThickness = thickness
+                };
+
+                ClockCanvas.Children.Add(line);
+
+                // Si c'est un point majeur (0, 5, 10...), on ajoute le chiffre
+                if (isMajor)
+                {
+                    // Le texte "60" remplace le "0" pour faire plus joli
+                    string numberText = (i == 0) ? "60" : i.ToString();
+
+                    TextBlock tb = new TextBlock()
+                    {
+                        Text = numberText,
+                        FontSize = 14,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = System.Windows.Media.Brushes.Black
+                    };
+
+                    // On place le texte un peu plus à l'intérieur (radius - 25)
+                    double textRadius = radius - 28;
+                    double xText = centerX + textRadius * Math.Cos(angleRad);
+                    double yText = centerY + textRadius * Math.Sin(angleRad);
+
+                    // On doit centrer le TextBlock par rapport à son point calculé
+                    // Comme on ne connait pas sa taille exacte avant le rendu, on estime ou on utilise Measure
+                    // Ici une astuce simple : Canvas.Left/Top
+                    tb.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+                    Canvas.SetLeft(tb, xText - (tb.DesiredSize.Width / 2));
+                    Canvas.SetTop(tb, yText - (tb.DesiredSize.Height / 2));
+
+                    ClockCanvas.Children.Add(tb);
+                }
+            }
+        }
+
+        private async void LoadSoundCloudMusic()
+        {
+            try
+            {
+                await MusicPlayer.EnsureCoreWebView2Async();
+
+                string targetUrl = "https://soundcloud.com/lofi_girl/sets/chill-guitar";
+                string encodedUrl = Uri.EscapeDataString(targetUrl);
+
+                // CHANGEMENT ICI : visual=false
+                // Cela force le lecteur en mode "barre fine" classique
+                string widgetUrl = $"https://w.soundcloud.com/player/?url={encodedUrl}&visual=false&auto_play=false&show_artwork=true";
+
+                MusicPlayer.Source = new Uri(widgetUrl);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Erreur SoundCloud : " + ex.Message);
+            }
         }
 
         protected override void OnStateChanged(EventArgs e)
@@ -219,11 +321,23 @@ namespace PomodoroApp
             {
                 player.Open(new Uri(currentNotificationSound, UriKind.RelativeOrAbsolute));
                 player.Play();
+
+                // Stop sound 5 sec later
+                stopSoundTimer = new DispatcherTimer();
+                stopSoundTimer.Interval = TimeSpan.FromSeconds(5);
+                stopSoundTimer.Tick += StopSoundTimer_Tick;
+                stopSoundTimer.Start();
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"Erreur lecture son : {ex.Message}");
             }
+        }
+
+        private void StopSoundTimer_Tick(object sender, EventArgs e)
+        {
+            stopSoundTimer.Stop();
+            player.Stop();
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -249,6 +363,12 @@ namespace PomodoroApp
             UnregisterHotKey(handle, HOTKEY_ID_MINITIMER);
             UnregisterHotKey(handle, HOTKEY_ID_RESTORE);
             _source.RemoveHook(HwndHook);
+
+            if (nIcon != null)
+            {
+                nIcon.Dispose(); // Removes the icon from the tray immediately
+                nIcon = null;
+            }
 
             // Ferme toutes les fenêtres ouvertes
             CloseAllWindows();
