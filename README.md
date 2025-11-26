@@ -12,7 +12,9 @@ The pomodoro technique uses a timer to break work into intervals, traditionally 
 - Hotkey ctrl + i, h, r. (i = open option window, h = made a transparent window timer, r = open the main window)
 
 ## Visual
-<img src="./assets/MainPage.png" alt="MainTimer">
-<img src="./assets/MiniTimer.png" alt="MiniTimer">
-<img src="./assets/OptionsPage" alt="OptionsPage"
+<p align="center">
+  <img src="./Assets/MainPage.png" alt="MainTimer" width="200" style="margin-right:10px;">
+  <img src="./Assets/MiniTimer.png" alt="MiniTimer" width="200" style="margin-right:10px;">
+  <img src="./Assets/OptionsPage.png" alt="OptionsPage" width="200">
+</p>
 
