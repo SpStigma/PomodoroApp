@@ -18,3 +18,4 @@ The pomodoro technique uses a timer to break work into intervals, traditionally 
   <img src="./Assets/OptionsPage.png" alt="OptionsPage" width="200">
 </p>
 
+Feel free to suggest any improvements or technical upgrades or advices all contributions are welcome!
