@@ -11,6 +11,8 @@ The pomodoro technique uses a timer to break work into intervals, traditionally 
 - Notification sound when the timer ends can be changed
 - Hotkey ctrl + i, h, r. (i = open option window, h = made a transparent window timer, r = open the main window)
 
-## Installation
-(In progress)
+## Visual
+<img src="./assets/MainPage.png" alt="MainTimer">
+<img src="./assets/MiniTimer.png" alt="MiniTimer">
+<img src="./assets/OptionsPage" alt="OptionsPage"
 
