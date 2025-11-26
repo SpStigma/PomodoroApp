@@ -3,16 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
 		ShowInTaskbar="False"
-        Title="Pomodoro" Height="450" Width="350"
+        Title="Pomodoro" Height="500" Width="350"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
 
     <Grid>
         <!-- On découpe la fenêtre en 2 zones -->
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
-            <!-- Zone 0 (Haut) : 100 pixels pour le lecteur -->
             <RowDefinition Height="*"/>
-            <!-- Zone 1 (Bas) : Le reste de la place -->
         </Grid.RowDefinitions>
 
         <!-- ZONE DU HAUT : Le Lecteur -->
@@ -22,42 +20,41 @@
                       VerticalAlignment="Stretch"/>
 
         <!-- LE CADRAN DU TIMER -->
-        <!-- Une grille de 200x200 pour tout centrer -->
         <Grid Width="200" Height="200" 
               Grid.Row="1"
                   HorizontalAlignment="Center" 
                   VerticalAlignment="Center"
                   Margin="0,0,0,30">
 
-            <!-- 1. Cercle blanc de fond -->
+            <!-- Cercle blanc de fond -->
             <Ellipse Stroke="Black" StrokeThickness="2" Fill="White" />
 
-            <!-- 2. Canvas qui recevra les traits et chiffres (Générés par C#) -->
+            <!-- Canvas qui recevra les traits et chiffres -->
             <Canvas x:Name="ClockCanvas" Width="200" Height="200" />
 
-            <!-- 3. L'Aiguille -->
-            <!-- Elle part du centre (100,100) et monte vers (100,20) -->
+            <!-- L'Aiguille -->
+
             <Line x:Name="ClockHand"
                       X1="100" Y1="100"
                       X2="100" Y2="20"
                       Stroke="Red" StrokeThickness="2"
                       StrokeEndLineCap="Round">
                 <Line.RenderTransform>
-                    <!-- Le point de pivot est le centre du cadran (100,100) -->
+                    <!-- Le point de pivot -->
                     <RotateTransform x:Name="HandRotation" 
                                          CenterX="100" CenterY="100" 
                                          Angle="0"/>
                 </Line.RenderTransform>
             </Line>
 
-            <!-- 4. Petit point rouge au centre (cache la base de l'aiguille) -->
+            <!-- Petit point rouge au centre (cache la base de l'aiguille) -->
             <Ellipse Width="8" Height="8" Fill="Red" 
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>
 
-        <!-- AFFICHER LE TEMPS (ex: 25:00) -->
         <!-- Placé en bas du cadran -->
         <Label x:Name="frontTimer"
+               Grid.Row="1"
                    Content="00:00"
                    FontSize="28"
                    FontWeight="Bold"
@@ -66,7 +63,6 @@
                    Margin="0,0,0,50"/>
 
         <!-- BOUTON START/PAUSE -->
-        <!-- Tout en bas de la fenêtre -->
         <Button x:Name="StartPauseButton"
                 Grid.Row="1"
                     Content="Start"

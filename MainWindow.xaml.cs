@@ -19,7 +19,7 @@ namespace PomodoroApp
         private bool isWorkCycle = true;
         private readonly MediaPlayer player = new();
         private int numberOfPomodoro = 0;
-        public int timeOfWork = 2500;
+        public int timeOfWork = 25;
         public int timeOfRest = 900;
         private Forms.NotifyIcon nIcon = new();
         private ContextMenuStrip contextMenu;
@@ -85,7 +85,7 @@ namespace PomodoroApp
 
         private void DrawClockFace()
         {
-            // Centre et Rayon du cadran (basé sur la taille 200x200 définie dans le XAML)
+            // Centre et Rayon du cadran
             double centerX = 100;
             double centerY = 100;
             double radius = 100;
@@ -94,7 +94,6 @@ namespace PomodoroApp
             for (int i = 0; i < 60; i++)
             {
                 // Calcul de l'angle (6 degrés par seconde)
-                // On retire 90 degrés pour commencer à midi (en haut) au lieu de 3h (à droite)
                 double angleDegree = i * 6;
                 double angleRad = (angleDegree - 90) * (Math.PI / 180);
 
