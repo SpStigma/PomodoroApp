@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<PropertyGroup Label="Globals">
+		<WebView2UseWinRT>False</WebView2UseWinRT>
+		<WebView2UseDispatchAdapter>False</WebView2UseDispatchAdapter>
+	</PropertyGroup>
+
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0-windows</TargetFramework>
@@ -16,6 +21,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Include="bin\Debug\net8.0-windows\pomodoro-technique_14991693.ico" />
 		<Content Include="pomodoro-technique_14991693.ico" />
 		<Content Include="Sounds\notif.mp3">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -23,13 +29,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="bin\Debug\net8.0-windows\Icon\pomodoro.ico" />
-		<None Include="bin\Release\net8.0-windows\Icon\pomodoro.ico" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3595.46" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3595.46" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<Content Include="$(TargetDir)runtimes\win-x64\native\WebView2Loader.dll">
+			<Link>WebView2Loader.dll</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<PublishState>Include</PublishState>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="bin\Debug\net8.0-windows\Icon\pomodoro.ico" />
+		<None Include="bin\Debug\net8.0-windows\pomodoro-technique_14991693.ico" />
 	</ItemGroup>
 
 </Project>
